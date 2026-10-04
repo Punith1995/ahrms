@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   LayoutDashboard, Building2, Users, CalendarCheck, CalendarOff,
   Wallet, FileText, UserPlus, UserMinus, BarChart3, LogOut, KeyRound, X,
-  ChevronDown, ChevronsUpDown,
+  ChevronDown, ChevronsUpDown, Menu,
 } from "lucide-react";
 import { companyApi, authApi, errorText } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -76,6 +76,13 @@ export default function DashboardLayout() {
   const [companies, setCompanies] = useState([]);
   const [companyId, setCompanyId] = useState(null);
   const [pwOpen, setPwOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false); // mobile sidebar
+  const location = useLocation();
+
+  // close the mobile sidebar whenever the route changes
+  useEffect(() => {
+    setNavOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     let alive = true;
@@ -99,8 +106,20 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-[#eef2f7]">
+      {/* ------------------------------------------- mobile backdrop */}
+      {navOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-navy/50 lg:hidden"
+          onClick={() => setNavOpen(false)}
+        />
+      )}
+
       {/* ---------------------------------------------------------- sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-gradient-to-b from-[#1e3a6b] to-[#0e1f3d] text-white">
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-gradient-to-b from-[#1e3a6b] to-[#0e1f3d] text-white transition-transform duration-200 lg:z-30 lg:translate-x-0 ${
+          navOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         {/* brand */}
         <div className="flex items-center gap-3 px-5 py-5">
           <Logo size={40} rounded="rounded-xl" fallbackClass="bg-amber font-black text-navy shadow-lg shadow-amber/20">
@@ -110,6 +129,13 @@ export default function DashboardLayout() {
             <div className="text-base font-bold tracking-wide">AHRMS</div>
             <div className="text-[11px] text-white/55">Ashwija HR Consultancy</div>
           </div>
+          <button
+            onClick={() => setNavOpen(false)}
+            className="ml-auto rounded-lg p-1.5 text-white/70 hover:bg-white/10 lg:hidden"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* nav */}
@@ -176,18 +202,27 @@ export default function DashboardLayout() {
       </aside>
 
       {/* ---------------------------------------------------- main column */}
-      <div className="flex min-h-screen min-w-0 flex-col pl-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/70 bg-white/85 px-6 backdrop-blur">
+      <div className="flex min-h-screen min-w-0 flex-col lg:pl-64">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200/70 bg-white/85 px-4 backdrop-blur sm:px-6">
+          {/* hamburger — mobile only */}
+          <button
+            onClick={() => setNavOpen(true)}
+            className="-ml-1 rounded-lg p-2 text-navy hover:bg-slate-100 lg:hidden"
+            aria-label="Open menu"
+          >
+            <Menu size={22} />
+          </button>
+
           {/* company selector */}
           {companies.length > 0 ? (
-            <div className="relative">
+            <div className="relative min-w-0 flex-1 sm:flex-none">
               <Building2 size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-navy/60" />
               <select
                 value={companyId ?? "all"}
                 onChange={(e) =>
                   setCompanyId(e.target.value === "all" ? null : Number(e.target.value))
                 }
-                className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm font-semibold text-navy shadow-sm outline-none transition hover:border-navy/30 focus:border-navy focus:ring-2 focus:ring-navy/15"
+                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm font-semibold text-navy shadow-sm outline-none transition hover:border-navy/30 focus:border-navy focus:ring-2 focus:ring-navy/15 sm:w-auto"
               >
                 <option value="all">All companies</option>
                 {companies.map((c) => (
@@ -200,8 +235,8 @@ export default function DashboardLayout() {
             <span className="text-sm text-slate-400">No companies yet</span>
           )}
 
-          <div className="flex items-center gap-4">
-            <span className="hidden text-sm text-slate-400 sm:inline">{todayLabel}</span>
+          <div className="ml-auto flex items-center gap-3 sm:gap-4">
+            <span className="hidden text-sm text-slate-400 md:inline">{todayLabel}</span>
             <div className="flex items-center gap-2.5">
               <Logo size={32} rounded="rounded-full" fallbackClass="bg-navy text-xs font-bold text-white">
                 {initials(user?.name || user?.email)}
@@ -213,7 +248,7 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 p-6 lg:p-8">
+        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           <Outlet context={{ companyId, company: selected, companies, allCompanies: companyId === null }} />
         </main>
       </div>
