@@ -140,25 +140,27 @@ export default function CompanyDetail() {
         <ArrowLeft size={15} /> Companies
       </button>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <div className="flex flex-wrap items-start gap-5">
-          <Monogram name={form.name} logo={fileUrl(form.logo)} size={56} />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-lg font-semibold text-navy">{form.name}</h1>
-              <Pill tone={form.status === "Active" ? "green" : "amber"}>
-                {form.status}
-              </Pill>
-            </div>
-            <p className="mt-0.5 text-sm text-slate-500">{form.legalName}</p>
-            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500">
-              <span>Code <b className="text-slate-700">{form.code}</b></span>
-              <span>Employees <b className="text-slate-700">{form.headcount}</b></span>
-              <span>Salary on <b className="text-slate-700">day {form.payroll?.salaryDate ?? "—"}</b></span>
-              <span>Client since <b className="text-slate-700">{form.onboardedOn || "—"}</b></span>
+      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+          <div className="flex min-w-0 flex-1 items-start gap-4">
+            <Monogram name={form.name} logo={fileUrl(form.logo)} size={56} />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-lg font-semibold text-navy">{form.name}</h1>
+                <Pill tone={form.status === "Active" ? "green" : "amber"}>
+                  {form.status}
+                </Pill>
+              </div>
+              <p className="mt-0.5 text-sm text-slate-500">{form.legalName}</p>
+              <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-slate-500 sm:flex sm:flex-wrap sm:gap-x-6 sm:gap-y-1">
+                <span>Code <b className="text-slate-700">{form.code}</b></span>
+                <span>Employees <b className="text-slate-700">{form.headcount}</b></span>
+                <span>Salary on <b className="text-slate-700">day {form.payroll?.salaryDate ?? "—"}</b></span>
+                <span>Client since <b className="text-slate-700">{form.onboardedOn || "—"}</b></span>
+              </div>
             </div>
           </div>
-          <div className="w-44">
+          <div className="w-full shrink-0 sm:w-44">
             <div className="text-xs font-medium text-slate-500">Documents on file</div>
             <div className="mt-2">
               <ReadinessBar value={readiness(form)} />
@@ -530,7 +532,7 @@ function RegistrationsTab({ form, set }) {
             </div>
             <input
               value={form.registrations?.[r.key]?.number || ""}
-              onChange={(e) => set(`registrations.${r.key}.number`, e.target.value.toUpperCase())}
+              onChange={(e) => set(`registrations.${r.key}.number`, e.target.value)}
               placeholder="Not applicable"
               className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm tracking-wide text-slate-800 outline-none focus:border-navy focus:ring-2 focus:ring-navy/15"
             />
