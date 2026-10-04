@@ -22,7 +22,18 @@ const app = express();
 
 // app.use(cors());
 
-  app.use(cors({ origin: true, credentials: true }));
+  const allowedOrigins = [
+  "https://ahrms-1.onrender.com",
+  "http://localhost:5173",
+];
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 
 app.use(express.json({ limit: "2mb" }));
