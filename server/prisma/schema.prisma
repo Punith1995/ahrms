@@ -1,13 +1,396 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// The only accounts that can sign in. role is kept for future Company Admins,
+// but everything today runs as a single "admin".
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("admin")
+  active       Boolean  @default(true)
+  lastLoginAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+model Company {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  name       String
+  legalName  String
+  logoUrl    String?
+  entityType String   @default("Private Limited")
+  industry   String?
+  status     String   @default("Onboarding")
+  onboardedOn DateTime?
+  headcount  Int      @default(0)
+
+  address       String?
+  city          String?
+  state         String?
+  pin           String?
+  contactPerson String?
+  phone         String?
+  email         String?
+
+  registrations Json @default("{}")
+  bank          Json @default("{}")
+  payroll       Json @default("{}")
+  compliance    Json @default("{}")
+  authorization Json @default("{}")
+  leavePolicy   Json @default("{}")
+
+  documents    CompanyDocument[]
+  employees    Employee[]
+  attendance   AttendanceDay[]
+  attMonths    AttendanceMonth[]
+  payrollRuns  PayrollRun[]
+  exits        Exit[]
+  leaveRecords LeaveRecord[]
+  leaveEncashments LeaveEncashment[]
+  monthlyDeductions MonthlyDeduction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("companies")
+}
+
+model CompanyDocument {
+  id        Int     @id @default(autoincrement())
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  docKey String
+  status String @default("pending")
+
+  fileName String?
+  filePath String?
+  fileSize Int?
+  mimeType String?
+
+  receivedOn DateTime?
+  expiresOn  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, docKey])
+  @@index([expiresOn])
+  @@map("company_documents")
+}
+
+model Employee {
+  id        Int     @id @default(autoincrement())
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  employeeCode String
+  photoUrl     String?
+
+  fullName        String
+  fatherSpouseName String?
+  dob             DateTime?
+  gender          String?
+  maritalStatus   String?
+  mobile          String?
+  email           String?
+  address         String?
+  emergencyName   String?
+  emergencyPhone  String?
+
+  designation    String?
+  department     String?
+  doj            DateTime?
+  employmentType String?  @default("Permanent")
+  workLocation   String?
+  reportingTo    String?
+  probationMonths Int     @default(0)
+  shiftPattern   String?
+  weeklyOff      String?
+
+  aadhaar String?
+  pan     String?
+  uan     String?
+  esicIp  String?
+
+  pfApplicable  Boolean @default(true)
+  esiApplicable Boolean @default(true)
+  ptApplicable  Boolean @default(true)
+  previousPfMember Boolean @default(false)
+
+  bankAccountName String?
+  bankName        String?
+  bankAccountNo   String?
+  bankIfsc        String?
+
+  ctcMonthly      Int   @default(0)
+  salaryStructure Json  @default("{}")
+
+  joiningStage  String   @default("personal")
+  joiningStatus String   @default("in_progress")
+  status        String   @default("Onboarding")
+
+  salaryHold       Boolean @default(false)
+  salaryHoldReason String?
+  startedOn     DateTime @default(now())
+  joinedOn      DateTime?
+  notes         String?
+
+  documents    EmployeeDocument[]
+  attendance   AttendanceDay[]
+  attMonths    AttendanceMonth[]
+  payslips     Payslip[]
+  exit         Exit?
+  leaveRecords LeaveRecord[]
+  leaveEncashments LeaveEncashment[]
+  monthlyDeductions MonthlyDeduction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, employeeCode])
+  @@index([companyId, joiningStatus])
+  @@map("employees")
+}
+
+model EmployeeDocument {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  docKey String
+  status String @default("pending")
+
+  fileName String?
+  filePath String?
+  fileSize Int?
+  mimeType String?
+
+  receivedOn DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, docKey])
+  @@map("employee_documents")
+}
+
+model AttendanceDay {
+  id         Int      @id @default(autoincrement())
+  companyId  Int
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  date    DateTime @db.Date
+  status  String
+  remarks String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, date])
+  @@index([companyId, date])
+  @@map("attendance_days")
+}
+
+model AttendanceMonth {
+  id         Int      @id @default(autoincrement())
+  companyId  Int
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  year    Int
+  month   Int
+  otHours Float @default(0)
+  locked  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, year, month])
+  @@index([companyId, year, month])
+  @@map("attendance_months")
+}
+
+model PayrollRun {
+  id        Int     @id @default(autoincrement())
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  year   Int
+  month  Int
+  status String @default("draft")
+
+  companySnapshot Json @default("{}")
+
+  totalEmployees   Int   @default(0)
+  totalGross       Float @default(0)
+  totalDeductions  Float @default(0)
+  totalNet         Float @default(0)
+  totalEmployerCost Float @default(0)
+
+  finalisedOn DateTime?
+  paidOn      DateTime?
+
+  payslips Payslip[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, year, month])
+  @@index([companyId, year, month])
+  @@map("payroll_runs")
+}
+
+model Payslip {
+  id     Int        @id @default(autoincrement())
+  runId  Int
+  run    PayrollRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  employeeSnapshot Json @default("{}")
+
+  payableDays Float @default(0)
+  lopDays     Float @default(0)
+  totalDays   Int   @default(0)
+  otHours     Float @default(0)
+
+  earnings   Json  @default("{}")
+  deductions Json  @default("{}")
+  employer   Json  @default("{}")
+
+  grossEarned Float @default(0)
+  totalDeductions Float @default(0)
+  netPay      Float @default(0)
+  employerCost Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([runId, employeeId])
+  @@index([employeeId])
+  @@map("payslips")
+}
+
+// One exit per employee. Runs its own small workflow to a full & final figure.
+model Exit {
+  id         Int      @id @default(autoincrement())
+  companyId  Int
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId Int      @unique
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  // stage: initiated | clearance | settlement | completed
+  stage  String @default("initiated")
+  status String @default("in_progress") // in_progress | completed | cancelled
+
+  exitType     String  @default("Resignation") // Resignation | Termination | End of contract | Retirement | Absconding
+  reason       String?
+  resignedOn   DateTime?
+  lastWorkingDay DateTime?
+  noticeServedDays Int   @default(0)
+  noticeRequiredDays Int @default(0)
+
+  // clearance checklist, stored as { key: boolean }
+  clearance Json @default("{}")
+
+  // full & final components
+  pendingSalary   Float @default(0)
+  leaveEncashment Float @default(0)
+  gratuity        Float @default(0)
+  bonus           Float @default(0)
+  otherEarnings   Float @default(0)
+  noticeRecovery  Float @default(0)
+  loanRecovery    Float @default(0)
+  otherDeductions Float @default(0)
+  netSettlement   Float @default(0)
+
+  settlementSnapshot Json @default("{}")
+
+  completedOn DateTime?
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, status])
+  @@map("exits")
+}
+
+// One row per employee per day of leave. Admin-entered only.
+// Paid leaves (CL/SL/EL) draw down balance; LOP cuts salary via attendance.
+model LeaveEncashment {
+  id         Int      @id @default(autoincrement())
+  companyId  Int
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  year       Int
+  month      Int?
+  days       Float
+  amount     Int
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([employeeId, year])
+  @@map("leave_encashments")
+}
+
+model MonthlyDeduction {
+  id         Int      @id @default(autoincrement())
+  companyId  Int
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  year       Int
+  month      Int
+  food       Int      @default(0)
+  transport  Int      @default(0)
+  uniform    Int      @default(0)
+  loan       Int      @default(0)
+  advance    Int      @default(0)
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([employeeId, year, month])
+  @@index([companyId, year, month])
+  @@map("monthly_deductions")
+}
+
+model LeaveRecord {
+  id         Int      @id @default(autoincrement())
+  companyId  Int
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  date      DateTime @db.Date
+  leaveType String   // CL SL EL LOP
+  paid      Boolean  @default(true)
+  reason    String?
+  year      Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, date])
+  @@index([companyId, year])
+  @@map("leave_records")
 }
