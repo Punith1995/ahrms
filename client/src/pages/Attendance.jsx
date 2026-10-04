@@ -16,9 +16,8 @@ const STATUS = {
   HD: { label: "Half day",   cell: "bg-amber-400 text-amber-950", dot: "bg-amber-400" },
   WO: { label: "Weekly off", cell: "bg-slate-300 text-slate-700", dot: "bg-slate-400" },
   H:  { label: "Holiday",    cell: "bg-violet-500 text-white",    dot: "bg-violet-500" },
-  CO: { label: "Comp-off",   cell: "bg-teal-600 text-white",      dot: "bg-teal-600" },
 };
-const ORDER = ["P", "A", "PL", "HD", "WO", "H", "CO"];
+const ORDER = ["P", "A", "PL", "HD", "WO", "H"];
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -576,7 +575,7 @@ function CompanyBoard({ companyId, companyName, year, month, brush, painting, so
       )}
       {importOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/40 p-4" onClick={() => !importing && setImportOpen(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <header className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-navy">
                 <Upload size={16} /> Import attendance — {companyName}
