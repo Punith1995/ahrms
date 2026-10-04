@@ -334,14 +334,14 @@ export default function JoiningDetail() {
 
       {/* unsaved bar */}
       {dirty && !done && (
-        <div className="fixed bottom-0 left-60 right-0 z-40 border-t border-slate-200 bg-white/95 px-6 py-3 backdrop-blur">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-slate-600">You have unsaved changes.</span>
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => setForm(clone(saved))}>
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:left-64">
+          <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
+            <span className="hidden text-sm text-slate-600 sm:inline">You have unsaved changes.</span>
+            <div className="flex w-full gap-2 sm:w-auto">
+              <Button variant="ghost" onClick={() => setForm(clone(saved))} className="flex-1 sm:flex-none">
                 <RotateCcw size={15} /> Discard
               </Button>
-              <Button variant="accent" onClick={() => save()} disabled={saving}>
+              <Button variant="accent" onClick={() => save()} disabled={saving} className="flex-1 sm:flex-none">
                 {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
                 {saving ? "Saving…" : "Save changes"}
               </Button>
