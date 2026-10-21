@@ -219,27 +219,29 @@ export default function JoiningDetail() {
       </button>
 
       {/* header */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <div className="flex flex-wrap items-start gap-5">
-          <Monogram name={form.fullName} size={56} />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-lg font-semibold text-navy">{form.fullName}</h1>
-              <Pill tone={done ? "green" : "amber"}>
-                {done ? "Joined" : "In progress"}
-              </Pill>
-            </div>
-            <p className="mt-0.5 text-sm text-slate-500">
-              {form.employeeCode} · {form.company?.name}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500">
-              <span>Role <b className="text-slate-700">{form.designation || "Not set"}</b></span>
-              <span>Joining <b className="text-slate-700">{form.doj || "Not set"}</b></span>
-              <span>CTC <b className="text-slate-700">{form.ctcMonthly ? money(form.ctcMonthly) : "Not set"}</b></span>
-              <span>File opened <b className="text-slate-700">{form.startedOn}</b></span>
+      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+          <div className="flex min-w-0 flex-1 items-start gap-4">
+            <Monogram name={form.fullName} size={56} />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="break-words text-lg font-semibold text-navy">{form.fullName}</h1>
+                <Pill tone={done ? "green" : "amber"}>
+                  {done ? "Joined" : "In progress"}
+                </Pill>
+              </div>
+              <p className="mt-0.5 break-words text-sm text-slate-500">
+                {form.employeeCode} · {form.company?.name}
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-slate-500 sm:flex sm:flex-wrap sm:gap-x-6 sm:gap-y-1">
+                <span className="min-w-0 break-words">Role <b className="text-slate-700">{form.designation || "Not set"}</b></span>
+                <span className="min-w-0 break-words">Joining <b className="text-slate-700">{form.doj || "Not set"}</b></span>
+                <span className="min-w-0 break-words">CTC <b className="text-slate-700">{form.ctcMonthly ? money(form.ctcMonthly) : "Not set"}</b></span>
+                <span className="min-w-0 break-words">File opened <b className="text-slate-700">{form.startedOn}</b></span>
+              </div>
             </div>
           </div>
-          <div className="w-44">
+          <div className="w-full shrink-0 sm:w-44">
             <div className="text-xs font-medium text-slate-500">Documents collected</div>
             <div className="mt-2">
               <ReadinessBar value={docProgress(form)} />

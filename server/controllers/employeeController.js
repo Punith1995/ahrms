@@ -254,7 +254,7 @@ exports.update = async (req, res, next) => {
       }
     }
 
-
+    const ctcChanged =
       data.ctcMonthly !== undefined && data.ctcMonthly !== existing.ctcMonthly;
     const rulesChanged =
       data.pfApplicable !== undefined || data.esiApplicable !== undefined;
